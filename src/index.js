@@ -1,1 +1,1 @@
-// index.js entry point
+// React entry point

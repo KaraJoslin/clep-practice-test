@@ -1,1 +1,1 @@
-// Full App.js logic for CLEP test with 90 questions
+// App logic for 90 CLEP-style questions

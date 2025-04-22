@@ -1,2 +1,2 @@
 # CLEP Full Practice App
-This is a React app for practicing 90 CLEP-style questions.
+A 90-question simulation for the College Composition Modular exam.
