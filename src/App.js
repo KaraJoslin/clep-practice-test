@@ -1,36 +1,33 @@
 import React, { useState } from "react";
 
-const questions = [
-  {
-    question: "Which of the following sentences is grammatically correct?",
-    options: [
-      "Him and I went to the store.",
-      "He and I went to the store.",
-      "He and me went to the store.",
-      "Me and him went to the store."
-    ],
-    answer: 1
-  },
-  {
-    question: "What is the main purpose of a thesis statement in an essay?",
-    options: [
-      "To summarize the essay's conclusion",
-      "To list all the arguments",
-      "To state the main idea or argument",
-      "To provide background information"
-    ],
-    answer: 2
+const generateQuestions = () => {
+  const categories = ["Grammar", "Revision", "Research", "Rhetorical"];
+  const questions = [];
+  for (let i = 0; i < 90; i++) {
+    questions.push({
+      question: `Question ${i + 1}: This is a sample question from ${categories[i % 4]}.`,
+      options: [
+        `Option A for Q${i + 1}`,
+        `Option B for Q${i + 1}`,
+        `Option C for Q${i + 1}`,
+        `Option D for Q${i + 1}`
+      ],
+      answer: Math.floor(Math.random() * 4)
+    });
   }
-];
+  return questions;
+};
+
+const questions = generateQuestions();
 
 export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleAnswer = (i) => {
+  const handleAnswer = (index) => {
     const updated = [...answers];
-    updated[currentQuestion] = i;
+    updated[currentQuestion] = index;
     setAnswers(updated);
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
@@ -64,7 +61,7 @@ export default function App() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>Question {currentQuestion + 1}</h1>
+      <h1>Question {currentQuestion + 1} of {questions.length}</h1>
       <p>{questions[currentQuestion].question}</p>
       {questions[currentQuestion].options.map((option, i) => (
         <button
