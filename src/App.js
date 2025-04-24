@@ -1,114 +1,108 @@
-import React, { useState, useEffect } from "react";
 
-const TOTAL_TIME = 95 * 60;
-const LOCAL_HISTORY_KEY = "clep_score_history";
+import React, { useState, useEffect } from 'react';
 
-const questions = Array.from({ length: 90 }, (_, i) => {
-  const category = i < 10 ? "Grammar" : i < 46 ? "Revision" : i < 68 ? "Research" : "Rhetorical";
-  return {
-    question: `Q${i + 1} (${category}): Choose the best revision or correction.`,
+const questions = [
+  {
+    id: 1,
+    question: "Q1 (Grammar): Choose the best revision or correction.",
     options: [
-      `A: Clear and correct version for Q${i + 1}`,
-      `B: Ambiguous or incomplete option for Q${i + 1}`,
-      `C: Incorrect or unclear choice for Q${i + 1}`,
-      `D: Verbose or improperly formatted version for Q${i + 1}`
+      "A: Clear and grammatically correct for Q1",
+      "B: Ambiguous or incomplete answer for Q1",
+      "C: Incorrect syntax or unclear reference in Q1",
+      "D: Verbose or improperly cited version of Q1"
     ],
-    answer: 0
-  };
-});
+    correctAnswer: "A: Clear and grammatically correct for Q1"
+  }
+  // Add more questions up to 90 in the same format
+];
 
-function formatTime(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return \`\${m}:\${s.toString().padStart(2, '0')}\`;
-}
-
-export default function App() {
+function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [submitted, setSubmitted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
-  const [timerActive, setTimerActive] = useState(true);
-  const [history, setHistory] = useState(() => {
-    const stored = localStorage.getItem(LOCAL_HISTORY_KEY);
-    return stored ? JSON.parse(stored) : [];
-  });
+  const [score, setScore] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [startTime, setStartTime] = useState(Date.now());
+  const [timeLeft, setTimeLeft] = useState(60 * 90); // 90 minutes
 
   useEffect(() => {
-    if (timerActive && timeLeft > 0) {
-      const interval = setInterval(() => setTimeLeft(t => t - 1), 1000);
-      return () => clearInterval(interval);
-    }
-    if (timeLeft === 0 && !submitted) {
-      handleSubmit();
-    }
-  }, [timerActive, timeLeft, submitted]);
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleComplete();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const handleAnswer = (index) => {
-    const updated = [...answers];
-    updated[currentQuestion] = index;
-    setAnswers(updated);
+  const handleAnswer = (option) => {
+    const question = questions[currentQuestion];
+    setSelectedAnswers(prev => ({ ...prev, [question.id]: option }));
+
+    if (option === question.correctAnswer) {
+      setScore(score + 1);
+    }
+
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      handleSubmit();
+      handleComplete();
     }
   };
 
-  const handleSubmit = () => {
-    const score = answers.reduce((total, a, i) => (a === questions[i].answer ? total + 1 : total), 0);
-    const session = {
-      date: new Date().toLocaleString(),
-      score,
-      outOf: questions.length,
-      timeRemaining: formatTime(timeLeft)
-    };
-    const updatedHistory = [session, ...history.slice(0, 4)];
-    localStorage.setItem(LOCAL_HISTORY_KEY, JSON.stringify(updatedHistory));
-    setHistory(updatedHistory);
-    setSubmitted(true);
-    setTimerActive(false);
+  const handleComplete = () => {
+    setIsComplete(true);
   };
 
   const handleRestart = () => {
     setCurrentQuestion(0);
-    setAnswers([]);
-    setSubmitted(false);
-    setTimeLeft(TOTAL_TIME);
-    setTimerActive(true);
+    setScore(0);
+    setIsComplete(false);
+    setSelectedAnswers({});
+    setStartTime(Date.now());
+    setTimeLeft(60 * 90);
   };
 
-  if (submitted) {
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return \`\${mins.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
+  };
+
+  if (isComplete) {
     return (
-      <div style={{ padding: 20 }}>
+      <div>
         <h1>Test Complete</h1>
-        <p>Your score: {answers.filter((a, i) => a === questions[i].answer).length} / {questions.length}</p>
-        <p>Time Remaining: {formatTime(timeLeft)}</p>
-        <button onClick={handleRestart}>Start Over</button>
-        <h2>Score History</h2>
+        <p>Your score: {score} / {questions.length}</p>
         <ul>
-          {history.map((h, i) => (
-            <li key={i}>
-              {h.date} — Score: {h.score}/{h.outOf}, Time Left: {h.timeRemaining}
+          {questions.map((q) => (
+            <li key={q.id}>
+              <strong>{q.question}</strong><br />
+              Correct Answer: {q.correctAnswer}<br />
+              Your Answer: {selectedAnswers[q.id]}
             </li>
           ))}
         </ul>
+        <button onClick={handleRestart}>Start Over</button>
       </div>
     );
   }
 
+  const question = questions[currentQuestion];
+
   return (
-    <div style={{ padding: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h1>Question {currentQuestion + 1} of {questions.length}</h1>
-        <h2>Time: {formatTime(timeLeft)}</h2>
-      </div>
-      <p>{questions[currentQuestion].question}</p>
-      {questions[currentQuestion].options.map((option, i) => (
-        <button key={i} onClick={() => handleAnswer(i)} style={{ display: "block", margin: "10px 0" }}>
-          {option}
-        </button>
+    <div>
+      <h1>Question {currentQuestion + 1} of {questions.length}</h1>
+      <p>{question.question}</p>
+      {question.options.map((opt, index) => (
+        <button key={index} onClick={() => handleAnswer(opt)}>{opt}</button>
       ))}
+      <p>Time Left: {formatTime(timeLeft)}</p>
     </div>
   );
 }
+
+export default App;
