@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 
 const questions = Array.from({ length: 90 }, (_, i) => {
-  const category = i < 10
-    ? "Grammar"
-    : i < 46
-    ? "Revision"
-    : i < 68
-    ? "Research"
-    : "Rhetorical";
+  const categories = ["Grammar", "Revision", "Research", "Rhetorical"];
+  const category = i < 10 ? categories[0] :
+                   i < 46 ? categories[1] :
+                   i < 68 ? categories[2] : categories[3];
 
   return {
-    question: `Q${i + 1} (${category}): What is the most appropriate correction for this sentence?`,
+    question: `Q${i + 1} (${category}): Choose the best revision or correction.`,
     options: [
-      `Option A: A grammatically sound alternative for Q${i + 1}`,
-      `Option B: Another rewrite option for Q${i + 1}`,
-      `Option C: A wordy or incorrect option for Q${i + 1}`,
-      `Option D: A poorly punctuated or illogical phrase for Q${i + 1}`
+      `A: Clear and grammatically correct for Q${i + 1}`,
+      `B: Ambiguous or incomplete answer for Q${i + 1}`,
+      `C: Incorrect syntax or unclear reference in Q${i + 1}`,
+      `D: Verbose or improperly cited version of Q${i + 1}`
     ],
     answer: 0
   };
