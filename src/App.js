@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 const questions = [
@@ -12,7 +11,7 @@ const questions = [
       "D: Verbose or improperly cited version of Q1"
     ],
     correctAnswer: "A: Clear and grammatically correct for Q1"
-  }
+  },
   // Add more questions up to 90 in the same format
 ];
 
@@ -21,7 +20,7 @@ function App() {
   const [score, setScore] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState({});
-  const [startTime, setStartTime] = useState(Date.now());
+  const [startTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(60 * 90); // 90 minutes
 
   useEffect(() => {
@@ -43,11 +42,12 @@ function App() {
     setSelectedAnswers(prev => ({ ...prev, [question.id]: option }));
 
     if (option === question.correctAnswer) {
-      setScore(score + 1);
+      setScore(prev => prev + 1);
     }
 
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+    const nextQuestion = currentQuestion + 1;
+    if (nextQuestion < questions.length) {
+      setCurrentQuestion(nextQuestion);
     } else {
       handleComplete();
     }
@@ -55,6 +55,9 @@ function App() {
 
   const handleComplete = () => {
     setIsComplete(true);
+    const scoreHistory = JSON.parse(localStorage.getItem('scoreHistory') || '[]');
+    scoreHistory.push({ date: new Date().toISOString(), score });
+    localStorage.setItem('scoreHistory', JSON.stringify(scoreHistory));
   };
 
   const handleRestart = () => {
@@ -62,23 +65,16 @@ function App() {
     setScore(0);
     setIsComplete(false);
     setSelectedAnswers({});
-    setStartTime(Date.now());
     setTimeLeft(60 * 90);
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return \`\${mins.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
   };
 
   if (isComplete) {
     return (
       <div>
-        <h1>Test Complete</h1>
+        <h2>Test Complete</h2>
         <p>Your score: {score} / {questions.length}</p>
         <ul>
-          {questions.map((q) => (
+          {questions.map(q => (
             <li key={q.id}>
               <strong>{q.question}</strong><br />
               Correct Answer: {q.correctAnswer}<br />
@@ -91,16 +87,17 @@ function App() {
     );
   }
 
-  const question = questions[currentQuestion];
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
 
   return (
     <div>
-      <h1>Question {currentQuestion + 1} of {questions.length}</h1>
-      <p>{question.question}</p>
-      {question.options.map((opt, index) => (
-        <button key={index} onClick={() => handleAnswer(opt)}>{opt}</button>
+      <h2>Question {currentQuestion + 1} of {questions.length}</h2>
+      <p>{questions[currentQuestion].question}</p>
+      {questions[currentQuestion].options.map(option => (
+        <button key={option} onClick={() => handleAnswer(option)}>{option}</button>
       ))}
-      <p>Time Left: {formatTime(timeLeft)}</p>
+      <p>Time Left: {minutes}:{seconds.toString().padStart(2, '0')}</p>
     </div>
   );
 }
