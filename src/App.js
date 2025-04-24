@@ -1,24 +1,25 @@
 import React, { useState } from "react";
 
-const generateQuestions = () => {
-  const categories = ["Grammar", "Revision", "Research", "Rhetorical"];
-  const questions = [];
-  for (let i = 0; i < 90; i++) {
-    questions.push({
-      question: `Question ${i + 1}: This is a sample question from ${categories[i % 4]}.`,
-      options: [
-        `Option A for Q${i + 1}`,
-        `Option B for Q${i + 1}`,
-        `Option C for Q${i + 1}`,
-        `Option D for Q${i + 1}`
-      ],
-      answer: Math.floor(Math.random() * 4)
-    });
-  }
-  return questions;
-};
+const questions = Array.from({ length: 90 }, (_, i) => {
+  const category = i < 10
+    ? "Grammar"
+    : i < 46
+    ? "Revision"
+    : i < 68
+    ? "Research"
+    : "Rhetorical";
 
-const questions = generateQuestions();
+  return {
+    question: `Q${i + 1} (${category}): What is the most appropriate correction for this sentence?`,
+    options: [
+      `Option A: A grammatically sound alternative for Q${i + 1}`,
+      `Option B: Another rewrite option for Q${i + 1}`,
+      `Option C: A wordy or incorrect option for Q${i + 1}`,
+      `Option D: A poorly punctuated or illogical phrase for Q${i + 1}`
+    ],
+    answer: 0
+  };
+});
 
 export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
