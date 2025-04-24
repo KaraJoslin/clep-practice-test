@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Triggering GitHub change detection
-// updated
+import React, { useState, useEffect } from "react";
 
 const questions = [
   {
@@ -12,8 +11,8 @@ const questions = [
       "D: Verbose or improperly cited version of Q1"
     ],
     correctAnswer: "A: Clear and grammatically correct for Q1"
-  },
-  // Add more questions up to 90 in the same format
+  }
+  // Add more questions here (up to 90)...
 ];
 
 function App() {
@@ -41,11 +40,9 @@ function App() {
   const handleAnswer = (option) => {
     const question = questions[currentQuestion];
     setSelectedAnswers(prev => ({ ...prev, [question.id]: option }));
-
     if (option === question.correctAnswer) {
       setScore(prev => prev + 1);
     }
-
     const nextQuestion = currentQuestion + 1;
     if (nextQuestion < questions.length) {
       setCurrentQuestion(nextQuestion);
@@ -56,12 +53,9 @@ function App() {
 
   const handleComplete = () => {
     setIsComplete(true);
-    const scoreHistory = JSON.parse(localStorage.getItem('scoreHistory') || '[]');
-    scoreHistory.push({ date: new Date().toISOString(), score });
-    localStorage.setItem('scoreHistory', JSON.stringify(scoreHistory));
   };
 
-  const handleRestart = () => {
+  const restartTest = () => {
     setCurrentQuestion(0);
     setScore(0);
     setIsComplete(false);
@@ -69,36 +63,36 @@ function App() {
     setTimeLeft(60 * 90);
   };
 
+  const formatTime = (seconds) => {
+    const min = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${min}:${sec.toString().padStart(2, "0")}`;
+  };
+
   if (isComplete) {
     return (
       <div>
-        <h2>Test Complete</h2>
-        <p>Your score: {score} / {questions.length}</p>
-        <ul>
-          {questions.map(q => (
-            <li key={q.id}>
-              <strong>{q.question}</strong><br />
-              Correct Answer: {q.correctAnswer}<br />
-              Your Answer: {selectedAnswers[q.id]}
-            </li>
-          ))}
-        </ul>
-        <button onClick={handleRestart}>Start Over</button>
+        <h2>Test Complete!</h2>
+        <p>Your score: {score} out of {questions.length}</p>
+        <button onClick={restartTest}>Restart Test</button>
       </div>
     );
   }
 
-  const minutes = Math.floor(timeLeft / 60);
-  const seconds = timeLeft % 60;
+  const current = questions[currentQuestion];
 
   return (
     <div>
       <h2>Question {currentQuestion + 1} of {questions.length}</h2>
-      <p>{questions[currentQuestion].question}</p>
-      {questions[currentQuestion].options.map(option => (
-        <button key={option} onClick={() => handleAnswer(option)}>{option}</button>
-      ))}
-      <p>Time Left: {minutes}:{seconds.toString().padStart(2, '0')}</p>
+      <p>{current.question}</p>
+      <ul>
+        {current.options.map((opt, idx) => (
+          <li key={idx}>
+            <button onClick={() => handleAnswer(opt)}>{opt}</button>
+          </li>
+        ))}
+      </ul>
+      <p>Time Left: {formatTime(timeLeft)}</p>
     </div>
   );
 }
