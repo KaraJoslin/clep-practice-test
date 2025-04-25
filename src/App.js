@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from "react";
 
-const questions = [
-  {
-    id: 1,
-    question: "Q1 (Grammar): Choose the best revision or correction.",
-    options: [
-      "A: Clear and grammatically correct for Q1",
-      "B: Ambiguous or incomplete answer for Q1",
-      "C: Incorrect syntax or unclear reference in Q1",
-      "D: Verbose or improperly cited version of Q1"
-    ],
-    correctAnswer: "A: Clear and grammatically correct for Q1"
-  }
-  // Add more questions here (up to 90)...
-];
+import React, { useState, useEffect } from 'react';
+
+const questions = Array.from({ length: 90 }, (_, i) => ({
+  id: i + 1,
+  question: `Q${i + 1}: Sample question ${i + 1}?`,
+  options: [
+    'Option A',
+    'Option B',
+    'Option C',
+    'Option D'
+  ],
+  correctAnswer: 'Option A'
+}));
 
 function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -21,7 +19,7 @@ function App() {
   const [isComplete, setIsComplete] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [startTime] = useState(Date.now());
-  const [timeLeft, setTimeLeft] = useState(60 * 90); // 90 minutes
+  const [timeLeft, setTimeLeft] = useState(60 * 90);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -40,9 +38,11 @@ function App() {
   const handleAnswer = (option) => {
     const question = questions[currentQuestion];
     setSelectedAnswers(prev => ({ ...prev, [question.id]: option }));
+
     if (option === question.correctAnswer) {
       setScore(prev => prev + 1);
     }
+
     const nextQuestion = currentQuestion + 1;
     if (nextQuestion < questions.length) {
       setCurrentQuestion(nextQuestion);
@@ -55,26 +55,12 @@ function App() {
     setIsComplete(true);
   };
 
-  const restartTest = () => {
-    setCurrentQuestion(0);
-    setScore(0);
-    setIsComplete(false);
-    setSelectedAnswers({});
-    setTimeLeft(60 * 90);
-  };
-
-  const formatTime = (seconds) => {
-    const min = Math.floor(seconds / 60);
-    const sec = seconds % 60;
-    return `${min}:${sec.toString().padStart(2, "0")}`;
-  };
-
   if (isComplete) {
     return (
       <div>
-        <h2>Test Complete!</h2>
-        <p>Your score: {score} out of {questions.length}</p>
-        <button onClick={restartTest}>Restart Test</button>
+        <h2>Test Completed</h2>
+        <p>Your score: {score} / {questions.length}</p>
+        <p>Time Taken: {Math.round((Date.now() - startTime) / 1000)} seconds</p>
       </div>
     );
   }
@@ -85,14 +71,10 @@ function App() {
     <div>
       <h2>Question {currentQuestion + 1} of {questions.length}</h2>
       <p>{current.question}</p>
-      <ul>
-        {current.options.map((opt, idx) => (
-          <li key={idx}>
-            <button onClick={() => handleAnswer(opt)}>{opt}</button>
-          </li>
-        ))}
-      </ul>
-      <p>Time Left: {formatTime(timeLeft)}</p>
+      {current.options.map((opt, i) => (
+        <button key={i} onClick={() => handleAnswer(opt)}>{opt}</button>
+      ))}
+      <p>Time Left: {timeLeft}s</p>
     </div>
   );
 }
